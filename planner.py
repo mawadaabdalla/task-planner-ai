@@ -37,17 +37,13 @@ def model_call(goal: str) -> dict:
     except Exception as e:
         raise ValueError(f"Model did not return valid JSON: {e}")
         
-def generate_plan(goal):
+def generate_plan(goal: str):
     response = model_call(goal)
-    try:
-        plan = json.loads(response)
-    except json.JSONDecodeError:
-        print("⚠️ Model returned invalid JSON:")
-        print(response)
-        plan = {
-            "tasks": [],
-            "evaluation": "Model returned invalid JSON",
-            "revision_log": "Check model response formatting"
-        }
-    return plan
+    if not isinstance(response, dict):
+        raise ValueError("Model did not return valid JSON.")
+    plan = response.get("plan")
+    evaluation = response.get("evaluation")
+    revision_log = response.get("revision_log", [])
+    return plan, evaluation, revision_log
+
 
